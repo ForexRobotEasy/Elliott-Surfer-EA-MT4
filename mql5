@@ -1,0 +1,52 @@
+
+// Developer's site: forexroboteasy.com
+// Development name: Forex Robot Easy Team
+
+// Elliott Surfer EA MT4
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Trade\PositionInfo.mqh>
+
+// Define necessary variables and constants
+extern double StopLoss = 50; // Stop loss value in pips
+extern double TakeProfit = 100; // Take profit value in pips
+extern double RiskPercentage = 2; // Risk percentage per trade
+extern int MagicNumber = 12345; // Unique identifier for trades
+
+// Initialize trade object
+CTrade trade;
+
+// Define entry function
+int OnInit()
+{
+    return(INIT_SUCCEEDED);
+}
+
+// Define start function
+void OnTick()
+{
+    // Check if there are any open positions
+    if(PositionInfo.Total() == 0)
+    {
+        // Get the current market price
+        double currentPrice = SymbolInfo.Double(_Symbol, SYMBOL_BID);
+
+        // Calculate lot size based on risk percentage
+        double lotSize = AccountInfo.Double(ACCOUNT_MARGIN_FREE) * RiskPercentage / 100 / StopLoss;
+
+        // Calculate stop loss and take profit levels
+        double stopLossLevel = currentPrice - StopLoss * _Point;
+        double takeProfitLevel = currentPrice + TakeProfit * _Point;
+
+        // Place a new trade
+        trade.Buy(lotSize, _Symbol, stopLossLevel, takeProfitLevel, MagicNumber);
+    }
+}
+
+// Define deinitialization function
+void OnDeinit(const int reason)
+{
+    // Close any open positions
+    trade.CloseAll();
+}
